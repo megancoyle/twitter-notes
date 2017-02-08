@@ -37,7 +37,36 @@ module.exports = {
     res.clearCookie('oauth_token');
     res.clearCookie('oauth_token_secret');
 
+    // exchange oauth-verifier for an access token
+    oauth.getOAuthAccessToken(
+      req.cookies.oauth_token,
+      req.cookies.oauth_token_secret,
+      req.query.oauth_verifier,
+      function(error, oauth_access_token, oauth_access_token_secret, results) {
+        if (error) {
+          return cb(error);
+        }
+
+        // get the user's twitter id
+        oauth.get('https://api.twitter.com/1.1/account/verify_credentials.js',
+          oauth_access_token, oauth_access_token_secret,
+          function(error, data) {
+            if (error) {
+              console.log(error);
+              return cb(error);
+            }
+
+            // parse the JSON response
+            data = JSON.parse(data);
+
+            // store the access token, token secret, and user's twitter id
+            res.cookie('acccess_token', oauth_access_token, { httpOnly: true });
+            res.cookie('access_token_secret', oauth_access_token_secret, { httpOnly: true });
+            res.redirect('twitter_id', data.id.str, { httpOnly: true });
+          });
+      });
+
     // tell router that authentication was successful
     cb();
   }
-}
+};
