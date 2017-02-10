@@ -1,7 +1,7 @@
 var OAuth = require('oauth').OAuth;
 var config = require('./config');
 
-// create the oauth object for accessing Twitter
+// Create the oauth object for accessing Twitter
 var oauth = new OAuth(
 	config.request_token_url,
 	config.access_token_url,
@@ -13,12 +13,12 @@ var oauth = new OAuth(
 );
 
 module.exports = {
-  get: function(url, access_token, access_token_secret, cb) {
-    oauth.get.call(oauth, url, access_token, access_token_secret, cb);
-  },
-  post: function(url, access_token, access_token_secret, body, cb) {
-    oauth.post.call(oauth, url, access_token, access_token_secret, body, cb);
-  },
+	get: function(url, access_token, access_token_secret, cb) {
+		oauth.get.call(oauth, url, access_token, access_token_secret, cb);
+	},
+	post: function(url, access_token, access_token_secret, body, cb) {
+		oauth.post.call(oauth, url, access_token, access_token_secret, body, cb);
+	},
 	redirectToTwitterLoginPage: function(req, res) {
 		oauth.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
 			if (error) {
@@ -36,11 +36,11 @@ module.exports = {
 			return cb("Request does not have all required keys");
 		}
 
-		// clear the request token data from the cookies
+		// Clear the request token data from the cookies
 		res.clearCookie('oauth_token');
 		res.clearCookie('oauth_token_secret');
 
-		// exchange oauth_verifier for an access token
+		// Exchange oauth_verifier for an access token
 		oauth.getOAuthAccessToken(
 			req.cookies.oauth_token,
 			req.cookies.oauth_token_secret,
@@ -49,8 +49,8 @@ module.exports = {
 				if (error) {
 					return cb(error);
 				}
-console.log("A");
-				// get the user's Twitter ID
+
+				// Get the user's Twitter ID
 				oauth.get('https://api.twitter.com/1.1/account/verify_credentials.json',
 					oauth_access_token, oauth_access_token_secret,
 					function(error, data) {
@@ -59,7 +59,7 @@ console.log("A");
 							return cb(error);
 						}
 
-						// parse the JSON response
+						// Parse the JSON response
 						data = JSON.parse(data);
 
 						// Store the access token, access token secret, and user's Twitter ID in cookies
@@ -67,7 +67,7 @@ console.log("A");
 						res.cookie('access_token_secret', oauth_access_token_secret, { httpOnly: true });
 						res.cookie('twitter_id', data.id_str, { httpOnly: true });
 
-						// tell router that authentication was successful
+						// Tell router that authentication was successful
 						cb();
 					});
 		});
